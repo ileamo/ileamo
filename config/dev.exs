@@ -60,7 +60,7 @@ config :ileamo, IleamoWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/ileamo_web/{live,views}/.*(ex)$",
+      ~r"lib/ileamo_web/(live|views)/.*(ex)$",
       ~r"lib/ileamo_web/templates/.*(eex)$"
     ]
   ]

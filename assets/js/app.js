@@ -16,10 +16,11 @@ import "phoenix_html"
 // Local files can be imported directly using relative paths, for example:
 // import socket from "./socket"
 
-//Enable connecting to a LiveView socket
 import {
   Socket
 } from "phoenix"
+
+//Enable connecting to a LiveView socket
 import LiveSocket from "phoenix_live_view"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
