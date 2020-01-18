@@ -1,6 +1,9 @@
 defmodule IleamoWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :ileamo
 
+  socket "/live", Phoenix.LiveView.Socket
+  #, websocket: [connect_info: [session: @session_options]]
+
   socket "/socket", IleamoWeb.UserSocket,
     websocket: true,
     longpoll: false

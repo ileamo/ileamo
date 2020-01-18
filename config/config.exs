@@ -15,7 +15,8 @@ config :ileamo, IleamoWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "0CKIK54ZX0SYu3h2vezGneaTbQt5wT0S0Ef5C/XNGjlwBuo1ZZDIcQuCGPWXTEnt",
   render_errors: [view: IleamoWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Ileamo.PubSub, adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: Ileamo.PubSub, adapter: Phoenix.PubSub.PG2],
+  live_view: [signing_salt: "kZBLSYy9R+g6RL7zhs/3NM1m7m3FdhJ8"]
 
 # Configures Elixir's Logger
 config :logger, :console,
