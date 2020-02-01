@@ -27,11 +27,25 @@ defmodule Ileamo.MQTT.Handler do
     {:ok, state}
   end
 
-  # #  topic filter room/+/temp
-  # def handle_message(["room", room, "temp"], payload, state) do
-  #   # :ok = Temperature.record(room, payload)
-  #   {:ok, state}
-  # end
+  def handle_message(["", "ru", "nsg", "imosunov", "taldom", "kitchen", "temp"], payload, state) do
+    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {:temp, payload})
+    {:ok, state}
+  end
+
+  def handle_message(["", "ru", "nsg", "imosunov", "taldom", "kitchen", "humi"], payload, state) do
+    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {:humi, payload})
+    {:ok, state}
+  end
+
+  def handle_message(["", "ru", "nsg", "imosunov", "taldom", "btemp"], payload, state) do
+    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {:btemp, payload})
+    {:ok, state}
+  end
+
+  def handle_message(["", "ru", "nsg", "imosunov", "taldom", "csq"], payload, state) do
+    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {:csq, payload})
+    {:ok, state}
+  end
 
   def handle_message(topic, payload, state) do
     IO.inspect {topic, payload, state}, label: "Message"
@@ -39,7 +53,6 @@ defmodule Ileamo.MQTT.Handler do
     # and you don't have a 'catch all' matcher; crashing on unexpected
     # messages could be a strategy though.
 
-    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", inspect(payload))
     {:ok, state}
   end
 
