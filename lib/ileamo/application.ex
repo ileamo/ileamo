@@ -20,6 +20,7 @@ defmodule Ileamo.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Ileamo.Supervisor]
     Supervisor.start_link(children, opts)
+    Ileamo.MQTT.start_mqtt()
   end
 
   # Tell Phoenix to update the endpoint configuration
