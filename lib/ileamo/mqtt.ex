@@ -15,6 +15,7 @@ end
 
 defmodule Ileamo.MQTT.Handler do
   use Tortoise.Handler
+  require Logger
 
   def init(args) do
     {:ok, args}
@@ -30,6 +31,7 @@ defmodule Ileamo.MQTT.Handler do
   end
 
   defp handle_taldom(payload, sensor) do
+    Logger.info("Датчик #{sensor} (#{inspect(payload)})")
     with {:ok, payload} <- Jason.decode(payload),
          val when is_binary(val) <- payload["sensor_value"] do
       Ileamo.TaldomAgent.update_sensor(sensor, val)
@@ -56,8 +58,8 @@ defmodule Ileamo.MQTT.Handler do
     {:ok, state}
   end
 
-  def handle_message(topic, payload, state) do
-    IO.inspect({topic, payload, state}, label: "Message")
+  def handle_message(topic, _payload, state) do
+    Logger.info("Необработанное сообщение: #{inspect(topic)}")
     # unhandled message! You will crash if you subscribe to something
     # and you don't have a 'catch all' matcher; crashing on unexpected
     # messages could be a strategy though.
