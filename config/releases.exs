@@ -6,4 +6,4 @@ config :ileamo, IleamoWeb.Endpoint,
   http: [port: {:system, "PORT"}],
   url: [host: System.get_env("APP_NAME") <> ".gigalixirapp.com", port: 443]
 
-config :ileamo, Ileamo.MQTT, client_id: "ileamo"
+config :ileamo, Ileamo.MQTT, client_id: "ileamo-gigalixir"

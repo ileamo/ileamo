@@ -1,6 +1,7 @@
 defmodule Ileamo.MQTT do
   def start_mqtt() do
-    client_id = Application.get_env(:ileamo, Ileamo.MQTT)[:client_id] || "ileamo"
+    client_id = Application.get_env(:ileamo, Ileamo.MQTT)[:client_id] || "ileamo12345"
+
 
     Tortoise.Supervisor.start_child(
       client_id: client_id,
