@@ -1,8 +1,6 @@
 /* This file is for your main application css. */
-
 @import "./phoenix.css";
 @import "../../deps/phoenix_live_view/assets/css/live_view.css";
-
 
 body {
   background-image: url("/images/taldom.jpg");
@@ -12,4 +10,13 @@ body {
   background-size: cover;
   /* background-size: contain; */
   height: 100vh;
+}
+
+.taldom-sensors {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
+  color:  #d5f5e3;
 }
