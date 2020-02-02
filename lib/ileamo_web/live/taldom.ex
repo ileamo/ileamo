@@ -7,23 +7,24 @@ defmodule IleamoWeb.TaldomView do
 
   def mount(_session, socket) do
     Phoenix.PubSub.subscribe(Ileamo.PubSub, "mqtt", link: true)
-    {:ok, assign(socket, temp: 0, humi: 0, btemp: 0, csq: 99)}
+    %{btemp: btemp, csq: csq, humi: humi, temp: temp} = Ileamo.TaldomAgent.get_sensor(:all)
+    {:ok, assign(socket, temp: temp, humi: humi, btemp: btemp, csq: csq)}
   end
 
   def handle_info({:temp, val}, socket) do
-    {:noreply, assign(socket, temp: inspect(val))}
+    {:noreply, assign(socket, temp: val)}
   end
 
   def handle_info({:humi, val}, socket) do
-    {:noreply, assign(socket, humi: inspect(val))}
+    {:noreply, assign(socket, humi: val)}
   end
 
   def handle_info({:btemp, val}, socket) do
-    {:noreply, assign(socket, btemp: inspect(val))}
+    {:noreply, assign(socket, btemp: val)}
   end
 
   def handle_info({:csq, val}, socket) do
-    {:noreply, assign(socket, csq: inspect(val))}
+    {:noreply, assign(socket, csq: val)}
   end
 
   def handle_info(mes, socket) do

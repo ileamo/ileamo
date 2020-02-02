@@ -1,7 +1,9 @@
 defmodule Ileamo.MQTT do
   def start_mqtt() do
+    client_id = Application.get_env(:ileamo, Ileamo.MQTT)[:client_id] || "ileamo"
+
     Tortoise.Supervisor.start_child(
-      client_id: "ileamo",
+      client_id: client_id,
       server: {Tortoise.Transport.Tcp, host: "84.253.109.156", port: 1883},
       handler: {Ileamo.MQTT.Handler, []},
       user_name: "imosunov",
@@ -19,7 +21,7 @@ defmodule Ileamo.MQTT.Handler do
   end
 
   def connection(status, state) do
-    IO.inspect {status, state}, label: "Connection"
+    IO.inspect({status, state}, label: "Connection")
     # `status` will be either `:up` or `:down`; you can use this to
     # inform the rest of your system if the connection is currently
     # open or closed; tortoise should be busy reconnecting if you get
@@ -27,28 +29,35 @@ defmodule Ileamo.MQTT.Handler do
     {:ok, state}
   end
 
+  defp handle_taldom(payload, sensor) do
+    with {:ok, payload} <- Jason.decode(payload),
+         val when is_binary(val) <- payload["sensor_value"] do
+      Ileamo.TaldomAgent.update_sensor(sensor, val)
+    end
+  end
+
   def handle_message(["", "ru", "nsg", "imosunov", "taldom", "kitchen", "temp"], payload, state) do
-    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {:temp, payload})
+    handle_taldom(payload, :temp)
     {:ok, state}
   end
 
   def handle_message(["", "ru", "nsg", "imosunov", "taldom", "kitchen", "humi"], payload, state) do
-    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {:humi, payload})
+    handle_taldom(payload, :humi)
     {:ok, state}
   end
 
-  def handle_message(["", "ru", "nsg", "imosunov", "taldom", "btemp"], payload, state) do
-    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {:btemp, payload})
+  def handle_message(["", "ru", "nsg", "imosunov", "taldom", "basement", "temp"], payload, state) do
+    handle_taldom(payload, :btemp)
     {:ok, state}
   end
 
   def handle_message(["", "ru", "nsg", "imosunov", "taldom", "csq"], payload, state) do
-    Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {:csq, payload})
+    handle_taldom(payload, :csq)
     {:ok, state}
   end
 
   def handle_message(topic, payload, state) do
-    IO.inspect {topic, payload, state}, label: "Message"
+    IO.inspect({topic, payload, state}, label: "Message")
     # unhandled message! You will crash if you subscribe to something
     # and you don't have a 'catch all' matcher; crashing on unexpected
     # messages could be a strategy though.
@@ -57,12 +66,12 @@ defmodule Ileamo.MQTT.Handler do
   end
 
   def subscription(status, topic_filter, state) do
-    IO.inspect {status, topic_filter, state}, label: "Subscription"
+    IO.inspect({status, topic_filter, state}, label: "Subscription")
     {:ok, state}
   end
 
   def terminate(reason, state) do
-    IO.inspect {reason, state}, label: "Terminaye"
+    IO.inspect({reason, state}, label: "Terminaye")
     # tortoise doesn't care about what you return from terminate/2,
     # that is in alignment with other behaviours that implement a
     # terminate-callback
