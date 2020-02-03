@@ -1,16 +1,18 @@
 defmodule Ileamo.MQTT do
   def start_mqtt() do
-    client_id = Application.get_env(:ileamo, Ileamo.MQTT)[:client_id] || "ileamo12345"
-
 
     Tortoise.Supervisor.start_child(
-      client_id: Ileamo.MQTT,
+      client_id: random_string(16),
       server: {Tortoise.Transport.Tcp, host: "84.253.109.156", port: 1883},
       handler: {Ileamo.MQTT.Handler, []},
       user_name: "imosunov",
       password: "i0708",
       subscriptions: [{"/ru/nsg/imosunov/taldom/#", 0}]
     )
+  end
+
+  defp random_string(length) do
+    :crypto.strong_rand_bytes(length) |> Base.url_encode64() |> binary_part(0, length)
   end
 end
 
@@ -33,6 +35,7 @@ defmodule Ileamo.MQTT.Handler do
 
   defp handle_taldom(payload, sensor) do
     Logger.info("Датчик #{sensor} (#{inspect(payload)})")
+
     with {:ok, payload} <- Jason.decode(payload),
          val when is_binary(val) <- payload["sensor_value"] do
       Ileamo.TaldomAgent.update_sensor(sensor, val)
