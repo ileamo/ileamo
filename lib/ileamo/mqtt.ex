@@ -4,7 +4,7 @@ defmodule Ileamo.MQTT do
 
 
     Tortoise.Supervisor.start_child(
-      client_id: client_id,
+      client_id: Ileamo.MQTT,
       server: {Tortoise.Transport.Tcp, host: "84.253.109.156", port: 1883},
       handler: {Ileamo.MQTT.Handler, []},
       user_name: "imosunov",
@@ -74,7 +74,7 @@ defmodule Ileamo.MQTT.Handler do
   end
 
   def terminate(reason, state) do
-    IO.inspect({reason, state}, label: "Terminaye")
+    IO.inspect({reason, state}, label: "Terminate")
     # tortoise doesn't care about what you return from terminate/2,
     # that is in alignment with other behaviours that implement a
     # terminate-callback
