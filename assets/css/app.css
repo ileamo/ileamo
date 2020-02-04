@@ -3,20 +3,30 @@
 @import "../../deps/phoenix_live_view/assets/css/live_view.css";
 
 body {
+  /* background-size: contain; */
+  height: 100vh;
+}
+
+body::before {
   background-image: url("/images/taldom.jpg");
   background-position: center center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
-  /* background-size: contain; */
-  height: 100vh;
+  content: "";
+  opacity: 0.5;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
 }
 
-.taldom-sensors {
+/* .taldom-sensors{
   position: fixed;
   top: 50%;
   left: 50%;
-  /* bring your own prefixes */
   transform: translate(-50%, -50%);
-  color:  #d5f5e3;
-}
+  color:  #26655f;
+} */
