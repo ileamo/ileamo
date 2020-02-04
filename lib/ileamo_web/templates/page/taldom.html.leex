@@ -1,8 +1,12 @@
 <div class="house">
   <div class="taldom-sensors">
-    <h1 style="color:  #26655f;"> Температура: <%= @temp %>&#8451;</h1>
-    <h1 style="color:  #26655f;"> Влажность: <%= @humi %>%</h1>
-    <h1 style="color:  #26655f;"> Подпол: <%= @btemp %>&#8451;</h1>
+    <h2 style="color:  #26655f;"><b>Температура: <%= @temp %>&#8451;</b></h2>
+    <p><%= @temp_date %></p>
+    <h2 style="color:  #26655f;"><b>Влажность: <%= @humi %>%</b></h2>
+    <p><%= @humi_date %></p>
+    <h2 style="color:  #26655f;"><b>Подпол: <%= @btemp %>&#8451;</b></h2>
+    <p><%= @btemp_date %></p>
     <h3 style="color:  #26655f;"> Уровень сигнала: <%= @csq %></h3>
+    <p><%= @csq_date %></p>
   </div>
 </div>

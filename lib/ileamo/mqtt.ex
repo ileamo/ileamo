@@ -1,6 +1,5 @@
 defmodule Ileamo.MQTT do
   def start_mqtt() do
-
     Tortoise.Supervisor.start_child(
       client_id: random_string(16),
       server: {Tortoise.Transport.Tcp, host: "84.253.109.156", port: 1883},
@@ -37,8 +36,9 @@ defmodule Ileamo.MQTT.Handler do
     Logger.info("Датчик #{sensor} (#{inspect(payload)})")
 
     with {:ok, payload} <- Jason.decode(payload),
-         val when is_binary(val) <- payload["sensor_value"] do
-      Ileamo.TaldomAgent.update_sensor(sensor, val)
+         {val, ts} when is_binary(val) and is_binary(ts) <-
+           {payload["sensor_value"], payload["timestamp"]} do
+      Ileamo.TaldomAgent.update_sensor(sensor, {val, ts})
     end
   end
 
