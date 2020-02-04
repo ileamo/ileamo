@@ -4,7 +4,6 @@
 
 body {
   /* background-size: contain; */
-  height: 100vh;
 }
 
 body::after {
@@ -21,6 +20,7 @@ body::after {
   right: 0;
   position: absolute;
   z-index: -1;
+  height: 100vh;
 }
 
 h2,h3 {
