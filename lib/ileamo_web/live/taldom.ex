@@ -15,6 +15,10 @@ defmodule IleamoWeb.TaldomView do
       temp: {temp, temp_date}
     } = Ileamo.TaldomAgent.get_sensor(:all)
 
+    if connected?(socket) do
+      Process.send_after(self(), :timer, 1000)
+    end
+
     {:ok,
      assign(socket,
        temp: temp,
@@ -24,8 +28,14 @@ defmodule IleamoWeb.TaldomView do
        temp_date: temp_date,
        humi_date: humi_date,
        btemp_date: btemp_date,
-       csq_date: csq_date
+       csq_date: csq_date,
+       local_time: get_local_time()
      )}
+  end
+
+  def handle_info(:timer, socket) do
+    Process.send_after(self(), :timer, 1000)
+    {:noreply, assign(socket, local_time: get_local_time())}
   end
 
   def handle_info({:temp, {val, ts}}, socket) do
@@ -47,5 +57,12 @@ defmodule IleamoWeb.TaldomView do
   def handle_info(mes, socket) do
     IO.inspect(mes, label: "Taldom")
     {:noreply, socket}
+  end
+
+  def get_local_time() do
+    NaiveDateTime.utc_now()
+    |> NaiveDateTime.truncate(:second)
+    |> NaiveDateTime.add(3 * 60 * 60, :second)
+    |> NaiveDateTime.to_string()
   end
 end
