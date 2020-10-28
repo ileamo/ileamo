@@ -43,15 +43,15 @@ defmodule IleamoWeb.TaldomView do
   end
 
   def handle_info({:humi, {val, ts}}, socket) do
-    {:noreply, assign(socket, humi: val, temp_date: ts)}
+    {:noreply, assign(socket, humi: val, humi_date: ts)}
   end
 
   def handle_info({:btemp, {val, ts}}, socket) do
-    {:noreply, assign(socket, btemp: val, temp_date: ts)}
+    {:noreply, assign(socket, btemp: val, btemp_date: ts)}
   end
 
   def handle_info({:csq, {val, ts}}, socket) do
-    {:noreply, assign(socket, csq: val, temp_date: ts)}
+    {:noreply, assign(socket, csq: val, csq_date: ts)}
   end
 
   def handle_info(mes, socket) do
@@ -60,9 +60,7 @@ defmodule IleamoWeb.TaldomView do
   end
 
   def get_local_time() do
-    NaiveDateTime.utc_now()
-    |> NaiveDateTime.truncate(:second)
-    |> NaiveDateTime.add(3 * 60 * 60, :second)
+    NaiveDateTime.local_now()
     |> NaiveDateTime.to_string()
   end
 end
