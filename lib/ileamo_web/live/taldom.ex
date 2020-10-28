@@ -1,5 +1,6 @@
 defmodule IleamoWeb.TaldomView do
   use Phoenix.LiveView
+  @no_connection "Нет связи с домом!"
 
   def render(assigns) do
     IleamoWeb.PageView.render("taldom.html", assigns)
@@ -9,6 +10,7 @@ defmodule IleamoWeb.TaldomView do
     Phoenix.PubSub.subscribe(Ileamo.PubSub, "mqtt", link: true)
 
     %{
+      timer: {timer, _},
       btemp: {btemp, btemp_date},
       csq: {csq, csq_date},
       humi: {humi, humi_date},
@@ -21,6 +23,7 @@ defmodule IleamoWeb.TaldomView do
 
     {:ok,
      assign(socket,
+       error: if(timer == "1", do: "", else: @no_connection),
        temp: temp,
        humi: humi,
        btemp: btemp,
@@ -39,19 +42,27 @@ defmodule IleamoWeb.TaldomView do
   end
 
   def handle_info({:temp, {val, ts}}, socket) do
-    {:noreply, assign(socket, temp: val, temp_date: ts)}
+    {:noreply, assign(socket, temp: val, temp_date: ts, error: "")}
   end
 
   def handle_info({:humi, {val, ts}}, socket) do
-    {:noreply, assign(socket, humi: val, humi_date: ts)}
+    {:noreply, assign(socket, humi: val, humi_date: ts, error: "")}
   end
 
   def handle_info({:btemp, {val, ts}}, socket) do
-    {:noreply, assign(socket, btemp: val, btemp_date: ts)}
+    {:noreply, assign(socket, btemp: val, btemp_date: ts, error: "")}
   end
 
   def handle_info({:csq, {val, ts}}, socket) do
-    {:noreply, assign(socket, csq: val, csq_date: ts)}
+    {:noreply, assign(socket, csq: val, csq_date: ts, error: "")}
+  end
+
+  def handle_info({:timer, {"1", _}}, socket) do
+    {:noreply, assign(socket, error: "")}
+  end
+
+  def handle_info({:timer, _}, socket) do
+    {:noreply, assign(socket, error: @no_connection)}
   end
 
   def handle_info(mes, socket) do

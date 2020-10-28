@@ -2,7 +2,12 @@ defmodule Ileamo.TaldomAgent do
   use Agent
 
   def start_link(_) do
-    Agent.start_link(fn -> %{temp: {"",""}, humi: {"",""}, btemp: {"",""}, csq: {99,""}} end, name: __MODULE__)
+    Agent.start_link(
+      fn ->
+        %{timer: {"1", ""}, temp: {"", ""}, humi: {"", ""}, btemp: {"", ""}, csq: {99, ""}}
+      end,
+      name: __MODULE__
+    )
   end
 
   def get_sensor(:all) do

@@ -24,7 +24,6 @@ defmodule Ileamo.MQTT.Handler do
   end
 
   def connection(status, state) do
-    IO.inspect({status, state}, label: "Connection")
     # `status` will be either `:up` or `:down`; you can use this to
     # inform the rest of your system if the connection is currently
     # open or closed; tortoise should be busy reconnecting if you get
@@ -33,7 +32,7 @@ defmodule Ileamo.MQTT.Handler do
   end
 
   defp handle_taldom(payload, sensor) do
-    Logger.info("Датчик #{sensor} (#{inspect(payload)})")
+    #Logger.info("Датчик #{sensor} (#{inspect(payload)})")
 
     with {:ok, payload} <- Jason.decode(payload),
          {val, ts} when is_binary(val) and is_binary(ts) <-
@@ -59,6 +58,11 @@ defmodule Ileamo.MQTT.Handler do
 
   def handle_message(["", "ru", "nsg", "imosunov", "taldom", "csq"], payload, state) do
     handle_taldom(payload, :csq)
+    {:ok, state}
+  end
+
+  def handle_message(["", "ru", "nsg", "imosunov", "taldom", "timer"], payload, state) do
+    Ileamo.TaldomAgent.update_sensor(:timer, {payload, ""})
     {:ok, state}
   end
 
