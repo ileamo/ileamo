@@ -60,7 +60,9 @@ defmodule IleamoWeb.TaldomView do
   end
 
   def get_local_time() do
-    NaiveDateTime.local_now()
-    |> NaiveDateTime.to_string()
+    (NaiveDateTime.utc_now()
+     |> NaiveDateTime.truncate(:second)
+     |> NaiveDateTime.add(3 * 60 * 60, :second)
+     |> NaiveDateTime.to_string()) <> " MSK"
   end
 end
