@@ -1,12 +1,8 @@
-defmodule IleamoWeb.TaldomView do
-  use Phoenix.LiveView
+defmodule IleamoWeb.TaldomLive do
+  use IleamoWeb, :live_view
   @no_connection "Нет связи с домом!"
 
-  def render(assigns) do
-    IleamoWeb.PageView.render("taldom.html", assigns)
-  end
-
-  def mount(_session, socket) do
+  def mount(_params, _session, socket) do
     Phoenix.PubSub.subscribe(Ileamo.PubSub, "mqtt", link: true)
 
     %{

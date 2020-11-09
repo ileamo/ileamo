@@ -8,15 +8,11 @@ defmodule Ileamo.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      Ileamo.TaldomAgent,
-
-      # Start the Ecto repository
       Ileamo.Repo,
-      # Start the endpoint when the application starts
-      IleamoWeb.Endpoint
-      # Starts a worker by calling: Ileamo.Worker.start_link(arg)
-      # {Ileamo.Worker, arg},
+      IleamoWeb.Endpoint,
 
+      {Phoenix.PubSub, [name: Ileamo.PubSub, adapter: Phoenix.PubSub.PG2]},
+      Ileamo.TaldomAgent
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
