@@ -33,7 +33,7 @@ defmodule Ileamo.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.5.3"},
+      {:phoenix, "~> 1.5.7"},
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.1"},
@@ -43,7 +43,7 @@ defmodule Ileamo.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:phoenix_live_view, "~> 0.14.8"},
+      {:phoenix_live_view, "~> 0.15.0"},
       {:floki, ">= 0.27.0", only: :test},
       {:tortoise, "~> 0.9"}
     ]
