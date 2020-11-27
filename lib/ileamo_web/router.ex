@@ -18,6 +18,9 @@ defmodule IleamoWeb.Router do
   scope "/", IleamoWeb do
     pipe_through :browser
 
+    get "/login", PageController, :index
+    post "/login", PageController, :login
+
     live "/", TaldomLive
   end
 
