@@ -1,7 +1,12 @@
 defmodule IleamoWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :ileamo
 
-  @session_options [store: :cookie, key: "_ileamo_key", signing_salt: "oSTxWJyK"]
+  @session_options [
+    store: :cookie,
+    key: "_ileamo_key",
+    signing_salt: "oSTxWJyK",
+    max_age: 86400 * 30
+  ]
 
   socket "/socket", IleamoWeb.UserSocket,
     websocket: true,

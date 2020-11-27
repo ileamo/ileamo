@@ -2,34 +2,40 @@ defmodule IleamoWeb.TaldomLive do
   use IleamoWeb, :live_view
   @no_connection "Нет связи с домом!"
 
-  def mount(_params, _session, socket) do
-    Phoenix.PubSub.subscribe(Ileamo.PubSub, "mqtt", link: true)
+  def mount(_params, session, socket) do
+    case Ileamo.Token.verify(IleamoWeb.Endpoint, session["token"]) do
+      {:ok, _} ->
+        Phoenix.PubSub.subscribe(Ileamo.PubSub, "mqtt", link: true)
 
-    %{
-      timer: {timer, _},
-      btemp: {btemp, btemp_date},
-      csq: {csq, csq_date},
-      humi: {humi, humi_date},
-      temp: {temp, temp_date}
-    } = Ileamo.TaldomAgent.get_sensor(:all)
+        %{
+          timer: {timer, _},
+          btemp: {btemp, btemp_date},
+          csq: {csq, csq_date},
+          humi: {humi, humi_date},
+          temp: {temp, temp_date}
+        } = Ileamo.TaldomAgent.get_sensor(:all)
 
-    if connected?(socket) do
-      Process.send_after(self(), :timer, 1000)
+        if connected?(socket) do
+          Process.send_after(self(), :timer, 1000)
+        end
+
+        {:ok,
+         assign(socket,
+           error: if(timer == "1", do: "", else: @no_connection),
+           temp: temp,
+           humi: humi,
+           btemp: btemp,
+           csq: csq,
+           temp_date: temp_date,
+           humi_date: humi_date,
+           btemp_date: btemp_date,
+           csq_date: csq_date,
+           local_time: get_local_time()
+         )}
+
+      _ ->
+        {:ok, redirect(socket, to: "/login")}
     end
-
-    {:ok,
-     assign(socket,
-       error: if(timer == "1", do: "", else: @no_connection),
-       temp: temp,
-       humi: humi,
-       btemp: btemp,
-       csq: csq,
-       temp_date: temp_date,
-       humi_date: humi_date,
-       btemp_date: btemp_date,
-       csq_date: csq_date,
-       local_time: get_local_time()
-     )}
   end
 
   def handle_info(:timer, socket) do
@@ -61,8 +67,7 @@ defmodule IleamoWeb.TaldomLive do
     {:noreply, assign(socket, error: @no_connection)}
   end
 
-  def handle_info(mes, socket) do
-    IO.inspect(mes, label: "Taldom")
+  def handle_info(_mes, socket) do
     {:noreply, socket}
   end
 
