@@ -45,7 +45,8 @@ defmodule Ileamo.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:phoenix_live_view, "~> 0.15.0"},
       {:floki, ">= 0.27.0", only: :test},
-      {:tortoise, "~> 0.9"}
+      {:tortoise, "~> 0.9"},
+      {:contex, git: "https://github.com/mindok/contex"}
     ]
   end
 

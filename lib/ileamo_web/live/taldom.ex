@@ -2,6 +2,7 @@ defmodule IleamoWeb.TaldomLive do
   use IleamoWeb, :live_view
   @no_connection "Нет связи с домом!"
 
+  @impl true
   def mount(_params, session, socket) do
     case Ileamo.Token.verify(IleamoWeb.Endpoint, session["token"]) do
       {:ok, _} ->
@@ -19,6 +20,8 @@ defmodule IleamoWeb.TaldomLive do
           Process.send_after(self(), :timer, 1000)
         end
 
+        send(self(), :after_mount)
+
         {:ok,
          assign(socket,
            error: if(timer == "1", do: "", else: @no_connection),
@@ -30,7 +33,8 @@ defmodule IleamoWeb.TaldomLive do
            humi_date: humi_date,
            btemp_date: btemp_date,
            csq_date: csq_date,
-           local_time: get_local_time()
+           local_time: get_local_time(),
+           plot: ""
          )}
 
       _ ->
@@ -38,6 +42,20 @@ defmodule IleamoWeb.TaldomLive do
     end
   end
 
+  @impl true
+  def handle_info(:after_mount, socket) do
+    IO.puts "Create plot"
+    data = [{~N[2020-11-30 00:00:00], 10}, {~N[2020-11-30 01:00:00], 12}, {~N[2020-11-30 02:00:00], 2}]
+    dataset = Contex.Dataset.new(data)
+    plot_content = Contex.LinePlot.new(dataset)
+    plot = Contex.Plot.new(600, 300, plot_content)
+    |> IO.inspect()
+    output = Contex.Plot.to_svg(plot)
+
+    {:noreply, assign(socket, plot: output)}
+  end
+
+  @impl true
   def handle_info(:timer, socket) do
     Process.send_after(self(), :timer, 1000)
     {:noreply, assign(socket, local_time: get_local_time())}
