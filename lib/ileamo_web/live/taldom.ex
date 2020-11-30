@@ -103,7 +103,7 @@ defmodule IleamoWeb.TaldomLive do
   end
 
   defp get_data_from_zabbix() do
-    with :ok <- Zabbix.API.create_client("https://84.253.109.139:10443"),
+    with :ok <- Zabbix.API.create_client("https://84.253.109.139:10443", 30_000),
          {:ok, _auth} <- Zabbix.API.login("imosunov", "IMo19-0708"),
          {:ok, %{"result" => [%{"itemid" => itemid, "key_" => "TEMP[taldom]"}]}} <-
            Zabbix.API.call("item.get", %{
