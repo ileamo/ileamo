@@ -1,5 +1,6 @@
 defmodule IleamoWeb.TaldomLive do
   use IleamoWeb, :live_view
+  require Logger
   @no_connection "Нет связи с домом!"
 
   @impl true
@@ -154,7 +155,8 @@ defmodule IleamoWeb.TaldomLive do
       end
 
     else
-      _ -> []
+      res -> Logger.error("Can't get data from Zabbix: #{inspect(res)}")
+        []
     end
   end
 
