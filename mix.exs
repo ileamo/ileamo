@@ -46,7 +46,8 @@ defmodule Ileamo.MixProject do
       {:phoenix_live_view, "~> 0.15.0"},
       {:floki, ">= 0.27.0", only: :test},
       {:tortoise, "~> 0.9"},
-      {:contex, git: "https://github.com/mindok/contex"}
+      {:contex, git: "https://github.com/mindok/contex"},
+      {:zabbix, git: "https://github.com/ileamo/zabbix.git"}
     ]
   end
 

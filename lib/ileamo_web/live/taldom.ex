@@ -44,13 +44,18 @@ defmodule IleamoWeb.TaldomLive do
 
   @impl true
   def handle_info(:after_mount, socket) do
-    IO.puts "Create plot"
-    data = [{~N[2020-11-30 00:00:00], 10}, {~N[2020-11-30 01:00:00], 12}, {~N[2020-11-30 02:00:00], 2}]
-    dataset = Contex.Dataset.new(data)
-    plot_content = Contex.LinePlot.new(dataset)
-    plot = Contex.Plot.new(600, 300, plot_content)
-    |> IO.inspect()
-    output = Contex.Plot.to_svg(plot)
+    output =
+      case get_data_from_zabbix() do
+        data = [_ | _] ->
+          dataset = Contex.Dataset.new(data)
+          plot_content = Contex.LinePlot.new(dataset)
+          plot = Contex.Plot.new(600, 300, plot_content)
+          |> Contex.Plot.plot_options(%{left_margin: 40})
+          Contex.Plot.to_svg(plot)
+
+        _ ->
+          ""
+      end
 
     {:noreply, assign(socket, plot: output)}
   end
@@ -94,5 +99,72 @@ defmodule IleamoWeb.TaldomLive do
      |> NaiveDateTime.truncate(:second)
      |> NaiveDateTime.add(3 * 60 * 60, :second)
      |> NaiveDateTime.to_string()) <> " MSK"
+  end
+
+  defp get_data_from_zabbix() do
+    with :ok <- Zabbix.API.create_client("https://84.253.109.139:10443"),
+         {:ok, _auth} <- Zabbix.API.login("imosunov", "IMo19-0708"),
+         {:ok, %{"result" => [%{"itemid" => itemid, "key_" => "TEMP[taldom]"}]}} <-
+           Zabbix.API.call("item.get", %{
+             host: "NSG1820MC_1701006070",
+             output: ["itemid", "key_"],
+             search: %{key_: "TEMP[taldom]"},
+             searchWildcardsEnabled: true
+           }),
+         {:ok, %{"result" => list}} <-
+           Zabbix.API.call("history.get", %{
+             itemids: itemid,
+             history: 0,
+             time_from: :os.system_time(:seconds) - 60 * 60 * 24 * 7
+
+
+           }) do
+      list =
+        list
+        |> Enum.map(fn %{"clock" => clock, "value" => value} ->
+          {String.to_integer(clock) + 3 * 60 * 60, String.to_float(value)}
+        end)
+        |> Enum.sort_by(fn {t, _} -> t end)
+
+      case list do
+        [_] ->
+          list
+
+        [{start, val} | tail] ->
+          {stop, _} = List.last(tail)
+          delta = (stop - start) / 60
+
+          tail
+          |> Enum.chunk_while(
+            {start, [{start, val}]},
+            fn el = {tm, _val}, {start, chunk} ->
+              if tm - start < delta do
+                {:cont, {start, [el | chunk]}}
+              else
+                {:cont, avg(chunk), {tm, [el]}}
+              end
+            end,
+            fn {_start, chunk} ->
+              {:cont, avg(chunk), {}}
+            end
+          )
+
+        _ ->
+          []
+      end
+
+    else
+      _ -> []
+    end
+  end
+
+  defp avg(chunk) do
+    length = length(chunk)
+
+    {x, y} =
+      chunk
+      |> Enum.reduce(fn {x, y}, {sx, sy} -> {sx + x, sy + y} end)
+
+    {div(x, length) |> DateTime.from_unix!(), y / length}
   end
 end
