@@ -1,16 +1,15 @@
 <div class="house">
-  <h1 class="text-red-500 text-3xl font-bold text-center">Tailwind CSS</h1>
   <div class="taldom-sensors">
-    <h2 style="color:  #26655f; margin-top: 2rem;"><b>Температура: <%= @temp %>&#8451;</b></h2>
-    <p><%= @temp_date %></p>
-    <h2 style="color:  #26655f;"><b>Влажность: <%= @humi %>%</b></h2>
-    <p><%= @humi_date %></p>
-    <h2 style="color:  #26655f;"><b>Подпол: <%= @btemp %>&#8451;</b></h2>
-    <p><%= @btemp_date %></p>
-    <h3 style="color:  #26655f;"> Уровень сигнала: <%= @csq %></h3>
-    <p><%= @csq_date %></p>
+    <h2 class="text-3xl text-green-800 font-bold mt-8">Температура: <%= @temp %>&#8451;</h2>
+    <p class="text-gray-400"><%= @temp_date %></p>
+    <h2 class="text-3xl text-green-800 font-bold mt-3">Влажность: <%= @humi %>%</h2>
+    <p class="text-gray-400"><%= @humi_date %></p>
+    <h2 class="text-3xl text-green-800 font-bold mt-3">Подпол: <%= @btemp %>&#8451;</h2>
+    <p class="text-gray-400"><%= @btemp_date %></p>
+    <h3 class="text-xl text-green-800 mt-3"> Уровень сигнала: <%= @csq %></h3>
+    <p class="text-gray-400"><%= @csq_date %></p>
   </div>
+  <div><h2 class="text-3xl text-red-800 font-bold mt-8"><%= @error %></h2></div>
   <div><%= @plot %></div>
-  <div><h2 style="color:  #ff3333;"><%= @error %></h2></div>
-  <div style="position:fixed; bottom:1rem; right:2rem;"><%= @local_time %></div>
+  <div class="fixed bottom-2 right-4"><%= @local_time %></div>
 </div>
