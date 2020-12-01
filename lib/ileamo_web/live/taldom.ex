@@ -46,7 +46,7 @@ defmodule IleamoWeb.TaldomLive do
   @impl true
   def handle_info(:after_mount, socket) do
     output =
-      case get_data_from_zabbix("btemp[taldom]") do
+      case get_data_from_zabbix("TEMP[taldom]") do
         data = [_ | _] ->
           dataset = Contex.Dataset.new(data)
 

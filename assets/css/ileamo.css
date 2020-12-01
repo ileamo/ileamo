@@ -1,8 +1,14 @@
-/* This file is for your main application css. */
-@import "./phoenix.css";
+html {
+  box-sizing: border-box;
+  font-size: 62.5%
+}
 
 body {
-  /* background-size: contain; */
+  color: #000000;
+  font-family: 'Helvetica', 'Arial', sans-serif;
+  font-size: 1.6em;
+  font-weight: 300;
+  line-height: 1.6
 }
 
 body::after {
@@ -22,18 +28,19 @@ body::after {
   height: 100vh;
 }
 
-h2,h3 {
+.container {
+  margin: 0 auto;
+  max-width: 80.0rem;
+  padding: 0 2.0rem;
+  position: relative;
+  width: 100%
+}
+
+h2, h3 {
   margin-bottom: 0;
 }
 
 p {
+  margin-top: 0;
   color: #808080;
 }
-
-/* .taldom-sensors{
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color:  #26655f;
-} */
