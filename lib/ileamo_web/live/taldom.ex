@@ -46,13 +46,14 @@ defmodule IleamoWeb.TaldomLive do
   @impl true
   def handle_info(:after_mount, socket) do
     output =
-      case get_data_from_zabbix() do
+      case get_data_from_zabbix("btemp[taldom]") do
         data = [_ | _] ->
           dataset = Contex.Dataset.new(data)
-          plot_content = Contex.LinePlot.new(dataset)
-          plot = Contex.Plot.new(600, 300, plot_content)
+
+          Contex.Plot.new(dataset, Contex.LinePlot, 600, 300, smoothed: true)
           |> Contex.Plot.plot_options(%{left_margin: 40})
-          Contex.Plot.to_svg(plot)
+          |> Contex.Plot.titles("Температура в доме", "")
+          |> Contex.Plot.to_svg()
 
         _ ->
           ""
@@ -102,28 +103,29 @@ defmodule IleamoWeb.TaldomLive do
      |> NaiveDateTime.to_string()) <> " MSK"
   end
 
-  defp get_data_from_zabbix() do
+  @tz 3 * 60 * 60
+  defp get_data_from_zabbix(key) do
+    current_time = :os.system_time(:seconds)
+
     with :ok <- Zabbix.API.create_client("https://84.253.109.139:10443", 30_000),
-         {:ok, _auth} <- Zabbix.API.login("imosunov", "IMo19-0708"),
-         {:ok, %{"result" => [%{"itemid" => itemid, "key_" => "TEMP[taldom]"}]}} <-
+         {:ok, _auth} <- Zabbix.API.login("ileamo", "ileamo4IoT"),
+         {:ok, %{"result" => [%{"itemid" => itemid, "key_" => ^key}]}} <-
            Zabbix.API.call("item.get", %{
              host: "NSG1820MC_1701006070",
              output: ["itemid", "key_"],
-             search: %{key_: "TEMP[taldom]"},
+             search: %{key_: key},
              searchWildcardsEnabled: true
            }),
          {:ok, %{"result" => list}} <-
            Zabbix.API.call("history.get", %{
              itemids: itemid,
              history: 0,
-             time_from: :os.system_time(:seconds) - 60 * 60 * 24 * 7
-
-
+             time_from: current_time - 60 * 60 * 24 * 7
            }) do
       list =
         list
         |> Enum.map(fn %{"clock" => clock, "value" => value} ->
-          {String.to_integer(clock) + 3 * 60 * 60, String.to_float(value)}
+          {String.to_integer(clock) + @tz, String.to_float(value)}
         end)
         |> Enum.sort_by(fn {t, _} -> t end)
 
@@ -132,7 +134,7 @@ defmodule IleamoWeb.TaldomLive do
           list
 
         [{start, val} | tail] ->
-          {stop, _} = List.last(tail)
+          {stop, _last_value} = List.last(tail)
           delta = (stop - start) / 60
 
           tail
@@ -145,17 +147,18 @@ defmodule IleamoWeb.TaldomLive do
                 {:cont, avg(chunk), {tm, [el]}}
               end
             end,
-            fn {_start, chunk} ->
-              {:cont, avg(chunk), {}}
+            fn {_start, [{_, v} | _] = chunk} ->
+              {:cont, avg([{current_time + @tz, v} | chunk]), {}}
             end
           )
+          |> IO.inspect()
 
         _ ->
           []
       end
-
     else
-      res -> Logger.error("Can't get data from Zabbix: #{inspect(res)}")
+      res ->
+        Logger.error("Can't get data from Zabbix: #{inspect(res)}")
         []
     end
   end
@@ -165,8 +168,8 @@ defmodule IleamoWeb.TaldomLive do
 
     {x, y} =
       chunk
-      |> Enum.reduce(fn {x, y}, {sx, sy} -> {sx + x, sy + y} end)
+      |> Enum.reduce(fn {_x, y}, {sx, sy} -> {sx, sy + y} end)
 
-    {div(x, length) |> DateTime.from_unix!(), y / length}
+    {x |> DateTime.from_unix!(), y / length}
   end
 end
