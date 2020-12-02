@@ -10,6 +10,9 @@
     <p class="text-gray-400"><%= @csq_date %></p>
   </div>
   <div><h2 class="text-3xl text-red-800 font-bold mt-8"><%= @error %></h2></div>
-  <div><%= @plot %></div>
+  <h2 class="text-xl text-blue-700 font-bold mt-3 text-center">
+    <%= @plot_header %>
+  </h2>
+  <div phx-click="plot-content" phx-value-key="<%= @plot_key %>"><%= @plot %></div>
   <div class="fixed bottom-2 right-4"><%= @local_time %></div>
 </div>

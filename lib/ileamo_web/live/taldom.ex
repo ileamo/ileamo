@@ -2,6 +2,10 @@ defmodule IleamoWeb.TaldomLive do
   use IleamoWeb, :live_view
   require Logger
   @no_connection "Нет связи с домом!"
+  @plots [
+    {"TEMP[taldom]", "Температура в доме"},
+    {"btemp[taldom]", "Температура в подполе"}
+  ]
 
   @impl true
   def mount(_params, session, socket) do
@@ -21,6 +25,8 @@ defmodule IleamoWeb.TaldomLive do
           Process.send_after(self(), :timer, 1000)
         end
 
+        {plot_key, plot_header} = get_next_plot()
+
         send(self(), :after_mount)
 
         {:ok,
@@ -35,7 +41,9 @@ defmodule IleamoWeb.TaldomLive do
            btemp_date: btemp_date,
            csq_date: csq_date,
            local_time: get_local_time(),
-           plot: ""
+           plot: "",
+           plot_key: plot_key,
+           plot_header: plot_header
          )}
 
       _ ->
@@ -44,22 +52,9 @@ defmodule IleamoWeb.TaldomLive do
   end
 
   @impl true
-  def handle_info(:after_mount, socket) do
-    output =
-      case get_data_from_zabbix("TEMP[taldom]") do
-        data = [_ | _] ->
-          dataset = Contex.Dataset.new(data)
-
-          Contex.Plot.new(dataset, Contex.LinePlot, 600, 300, smoothed: true)
-          |> Contex.Plot.plot_options(%{left_margin: 40})
-          |> Contex.Plot.titles("Температура в доме", "")
-          |> Contex.Plot.to_svg()
-
-        _ ->
-          ""
-      end
-
-    {:noreply, assign(socket, plot: output)}
+  def handle_info(:after_mount, socket = %{assigns: %{plot_key: key}}) do
+    Task.start(__MODULE__, :get_svg, [key, self()])
+    {:noreply, assign(socket, plot: "")}
   end
 
   @impl true
@@ -93,6 +88,28 @@ defmodule IleamoWeb.TaldomLive do
   end
 
   def handle_info(_mes, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("plot-content", %{"key" => key}, socket) do
+    {plot_key, plot_header} = get_next_plot(key)
+    Task.start(__MODULE__, :get_svg, [plot_key, self()])
+
+    {:noreply, assign(socket, plot_key: plot_key, plot_header: plot_header, plot: "")}
+  end
+
+  def handle_event(event, _, socket) do
+    Logger.error("Unrecognized event: #{inspect(event)}")
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_cast({:plot_svg, svg}, socket) do
+    {:noreply, assign(socket, plot: svg)}
+  end
+
+  def handle_cast(_, socket) do
     {:noreply, socket}
   end
 
@@ -151,7 +168,6 @@ defmodule IleamoWeb.TaldomLive do
               {:cont, avg([{current_time + @tz, v} | chunk]), {}}
             end
           )
-          |> IO.inspect()
 
         _ ->
           []
@@ -171,5 +187,41 @@ defmodule IleamoWeb.TaldomLive do
       |> Enum.reduce(fn {_x, y}, {sx, sy} -> {sx, sy + y} end)
 
     {x |> DateTime.from_unix!(), y / length}
+  end
+
+  defp get_next_plot() do
+    @plots |> List.first()
+  end
+
+  defp get_next_plot(key) do
+    {plot, _} =
+      @plots
+      |> Enum.reduce_while(
+        {List.first(@plots), false},
+        fn
+          el, {_plot, true} -> {:halt, {el, true}}
+          {^key, _}, {plot, _} -> {:cont, {plot, true}}
+          _, acc -> {:cont, acc}
+        end
+      )
+
+    plot
+  end
+
+  def get_svg(key, pid) do
+    svg =
+      case get_data_from_zabbix(key) do
+        data = [_ | _] ->
+          dataset = Contex.Dataset.new(data)
+
+          Contex.Plot.new(dataset, Contex.LinePlot, 600, 300, smoothed: true)
+          |> Contex.Plot.plot_options(%{left_margin: 40})
+          |> Contex.Plot.to_svg()
+
+        _ ->
+          ""
+      end
+
+    GenServer.cast(pid, {:plot_svg, svg})
   end
 end
