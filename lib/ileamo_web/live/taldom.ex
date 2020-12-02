@@ -53,7 +53,7 @@ defmodule IleamoWeb.TaldomLive do
 
   @impl true
   def handle_info(:after_mount, socket = %{assigns: %{plot_key: key}}) do
-    Task.start(__MODULE__, :get_svg, [key, self()])
+    Ileamo.PlotAgent.request_plot(key, self())
     {:noreply, assign(socket, plot: "")}
   end
 
@@ -94,8 +94,7 @@ defmodule IleamoWeb.TaldomLive do
   @impl true
   def handle_event("plot-content", %{"key" => key}, socket) do
     {plot_key, plot_header} = get_next_plot(key)
-    Task.start(__MODULE__, :get_svg, [plot_key, self()])
-
+    Ileamo.PlotAgent.request_plot(plot_key, self())
     {:noreply, assign(socket, plot_key: plot_key, plot_header: plot_header, plot: "")}
   end
 
@@ -120,75 +119,6 @@ defmodule IleamoWeb.TaldomLive do
      |> NaiveDateTime.to_string()) <> " MSK"
   end
 
-  @tz 3 * 60 * 60
-  defp get_data_from_zabbix(key) do
-    current_time = :os.system_time(:seconds)
-
-    with :ok <- Zabbix.API.create_client("https://84.253.109.139:10443", 30_000),
-         {:ok, _auth} <- Zabbix.API.login("ileamo", "ileamo4IoT"),
-         {:ok, %{"result" => [%{"itemid" => itemid, "key_" => ^key}]}} <-
-           Zabbix.API.call("item.get", %{
-             host: "NSG1820MC_1701006070",
-             output: ["itemid", "key_"],
-             search: %{key_: key},
-             searchWildcardsEnabled: true
-           }),
-         {:ok, %{"result" => list}} <-
-           Zabbix.API.call("history.get", %{
-             itemids: itemid,
-             history: 0,
-             time_from: current_time - 60 * 60 * 24 * 7
-           }) do
-      list =
-        list
-        |> Enum.map(fn %{"clock" => clock, "value" => value} ->
-          {String.to_integer(clock) + @tz, String.to_float(value)}
-        end)
-        |> Enum.sort_by(fn {t, _} -> t end)
-
-      case list do
-        [_] ->
-          list
-
-        [{start, val} | tail] ->
-          {stop, _last_value} = List.last(tail)
-          delta = (stop - start) / 60
-
-          tail
-          |> Enum.chunk_while(
-            {start, [{start, val}]},
-            fn el = {tm, _val}, {start, chunk} ->
-              if tm - start < delta do
-                {:cont, {start, [el | chunk]}}
-              else
-                {:cont, avg(chunk), {tm, [el]}}
-              end
-            end,
-            fn {_start, [{_, v} | _] = chunk} ->
-              {:cont, avg([{current_time + @tz, v} | chunk]), {}}
-            end
-          )
-
-        _ ->
-          []
-      end
-    else
-      res ->
-        Logger.error("Can't get data from Zabbix: #{inspect(res)}")
-        []
-    end
-  end
-
-  defp avg(chunk) do
-    length = length(chunk)
-
-    {x, y} =
-      chunk
-      |> Enum.reduce(fn {_x, y}, {sx, sy} -> {sx, sy + y} end)
-
-    {x |> DateTime.from_unix!(), y / length}
-  end
-
   defp get_next_plot() do
     @plots |> List.first()
   end
@@ -206,22 +136,5 @@ defmodule IleamoWeb.TaldomLive do
       )
 
     plot
-  end
-
-  def get_svg(key, pid) do
-    svg =
-      case get_data_from_zabbix(key) do
-        data = [_ | _] ->
-          dataset = Contex.Dataset.new(data)
-
-          Contex.Plot.new(dataset, Contex.LinePlot, 600, 300, smoothed: true)
-          |> Contex.Plot.plot_options(%{left_margin: 40})
-          |> Contex.Plot.to_svg()
-
-        _ ->
-          ""
-      end
-
-    GenServer.cast(pid, {:plot_svg, svg})
   end
 end

@@ -12,7 +12,8 @@ defmodule Ileamo.Application do
       IleamoWeb.Endpoint,
 
       {Phoenix.PubSub, [name: Ileamo.PubSub, adapter: Phoenix.PubSub.PG2]},
-      Ileamo.TaldomAgent
+      Ileamo.TaldomAgent,
+      Ileamo.PlotAgent
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
