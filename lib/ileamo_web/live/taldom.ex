@@ -7,6 +7,17 @@ defmodule IleamoWeb.TaldomLive do
     {"btemp[taldom]", "Температура в подполе"}
   ]
 
+  @waiting ~E"""
+  <div class="relative flex justify-center items-center h-60">
+  <svg class="animate-spin text-blue-500" width=50 height=50 xmlns="http://www.w3.org/2000/svg"
+      fill="none" viewBox="0 0 100 100" stroke="CurrentColor">
+
+      <path d="M10,50 a1,1 0 0,0 80,0"
+        style="stroke-width: 10" />
+      </svg>
+  </div>
+  """
+
   @impl true
   def mount(_params, session, socket) do
     case Ileamo.Token.verify(IleamoWeb.Endpoint, session["token"]) do
@@ -41,7 +52,7 @@ defmodule IleamoWeb.TaldomLive do
            btemp_date: btemp_date,
            csq_date: csq_date,
            local_time: get_local_time(),
-           plot: "",
+           plot: @waiting,
            plot_key: plot_key,
            plot_header: plot_header
          )}
@@ -54,7 +65,7 @@ defmodule IleamoWeb.TaldomLive do
   @impl true
   def handle_info(:after_mount, socket = %{assigns: %{plot_key: key}}) do
     Ileamo.PlotAgent.request_plot(key, self())
-    {:noreply, assign(socket, plot: "")}
+    {:noreply, assign(socket, plot: @waiting)}
   end
 
   @impl true
@@ -95,7 +106,7 @@ defmodule IleamoWeb.TaldomLive do
   def handle_event("plot-content", %{"key" => key}, socket) do
     {plot_key, plot_header} = get_next_plot(key)
     Ileamo.PlotAgent.request_plot(plot_key, self())
-    {:noreply, assign(socket, plot_key: plot_key, plot_header: plot_header, plot: "")}
+    {:noreply, assign(socket, plot_key: plot_key, plot_header: plot_header, plot: @waiting)}
   end
 
   def handle_event(event, _, socket) do

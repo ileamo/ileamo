@@ -19,6 +19,7 @@ import "phoenix_html"
 import {
   Socket
 } from "phoenix"
+import NProgress from "nprogress"
 
 //Enable connecting to a LiveView socket
 import LiveSocket from "phoenix_live_view"
@@ -29,4 +30,15 @@ let liveSocket = new LiveSocket("/live", Socket, {
     _csrf_token: csrfToken
   }
 });
+
+// Show progress bar on live navigation and form submits
+window.addEventListener("phx:page-loading-start", info => NProgress.start())
+window.addEventListener("phx:page-loading-stop", info => NProgress.done())
+
+// connect if there are any LiveViews on the page
 liveSocket.connect()
+
+// expose liveSocket on window for web console debug logs and latency simulation:
+// >> liveSocket.enableDebug()
+// >> liveSocket.enableLatencySim(1000)
+window.liveSocket = liveSocket
