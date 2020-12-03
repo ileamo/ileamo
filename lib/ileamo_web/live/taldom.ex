@@ -9,12 +9,12 @@ defmodule IleamoWeb.TaldomLive do
 
   @waiting ~E"""
   <div class="relative flex justify-center items-center h-60">
-  <svg class="animate-spin text-blue-500" width=50 height=50 xmlns="http://www.w3.org/2000/svg"
-      fill="none" viewBox="0 0 100 100" stroke="CurrentColor">
-
-      <path d="M10,50 a1,1 0 0,0 80,0"
-        style="stroke-width: 10" />
-      </svg>
+    <svg class="animate-spin text-blue-500" width=150 height=150
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none" viewBox="0 0 100 100" stroke="CurrentColor"
+    >
+      <path d="M10,50 a1,1 0 0,0 80,0" style="stroke-width: 5" />
+    </svg>
   </div>
   """
 
