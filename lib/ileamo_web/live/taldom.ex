@@ -8,7 +8,7 @@ defmodule IleamoWeb.TaldomLive do
   ]
 
   @waiting ~E"""
-  <div class="relative flex justify-center items-center h-60">
+  <div class="relative flex justify-center items-center">
     <svg class="animate-spin text-blue-500" width=150 height=150
       xmlns="http://www.w3.org/2000/svg"
       fill="none" viewBox="0 0 100 100" stroke="CurrentColor"
