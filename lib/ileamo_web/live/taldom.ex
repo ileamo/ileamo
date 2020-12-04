@@ -54,7 +54,8 @@ defmodule IleamoWeb.TaldomLive do
            local_time: get_local_time(),
            plot: @waiting,
            plot_key: plot_key,
-           plot_header: plot_header
+           plot_header: plot_header,
+           bounce: false
          )}
 
       _ ->
@@ -72,6 +73,14 @@ defmodule IleamoWeb.TaldomLive do
   def handle_info(:timer, socket) do
     Process.send_after(self(), :timer, 1000)
     {:noreply, assign(socket, local_time: get_local_time())}
+  end
+
+  def handle_info(:bounce, socket = %{assigns: %{bounce: bounce}}) do
+    if !bounce do
+      Process.send_after(self(), :bounce, 3000)
+    end
+
+    {:noreply, assign(socket, bounce: !bounce)}
   end
 
   def handle_info({:temp, {val, ts}}, socket) do
@@ -116,6 +125,7 @@ defmodule IleamoWeb.TaldomLive do
 
   @impl true
   def handle_cast({:plot_svg, svg}, socket) do
+    Process.send_after(self(), :bounce, 5000)
     {:noreply, assign(socket, plot: svg)}
   end
 
