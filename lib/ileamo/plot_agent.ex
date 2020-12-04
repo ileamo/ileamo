@@ -34,7 +34,7 @@ defmodule Ileamo.PlotAgent do
 
         Contex.Plot.new(dataset, Contex.LinePlot, 600, 300,
           smoothed: true,
-          colour_palette: ["1d4ed8"]
+          colour_palette: ["064E3B"]
         )
         |> Contex.Plot.plot_options(%{left_margin: 40})
         |> Contex.Plot.to_svg()
