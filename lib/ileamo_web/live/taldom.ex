@@ -76,11 +76,17 @@ defmodule IleamoWeb.TaldomLive do
   end
 
   def handle_info(:bounce, socket = %{assigns: %{bounce: bounce}}) do
-    if !bounce do
-      Process.send_after(self(), :bounce, 3000)
-    end
+    case bounce do
+      false ->
+        Process.send_after(self(), :bounce, 3000)
+        {:noreply, assign(socket, bounce: true)}
 
-    {:noreply, assign(socket, bounce: !bounce)}
+      true ->
+        {:noreply, assign(socket, bounce: nil)}
+
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   def handle_info({:temp, {val, ts}}, socket) do
@@ -124,8 +130,11 @@ defmodule IleamoWeb.TaldomLive do
   end
 
   @impl true
-  def handle_cast({:plot_svg, svg}, socket) do
-    Process.send_after(self(), :bounce, 5000)
+  def handle_cast({:plot_svg, svg}, socket = %{assigns: %{bounce: bounce}}) do
+    if bounce == false do
+      Process.send_after(self(), :bounce, 5000)
+    end
+
     {:noreply, assign(socket, plot: svg)}
   end
 
