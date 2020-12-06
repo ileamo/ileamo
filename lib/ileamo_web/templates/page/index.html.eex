@@ -1,4 +1,10 @@
 <%= form_for @conn, Routes.page_path(@conn, :index), fn f -> %>
-  <%= password_input f, :password %>
-  <%= submit "Войти" %>
+  <div class="flex flex-col items-center justify-center min-h-screen w-full">
+    <%= password_input f, :password,
+        class: "login-form"
+    %>
+    <%= submit "Войти",
+        class: "login-form hover:text-green-900 font-bold mt-3"
+    %>
+  </div>
 <% end %>

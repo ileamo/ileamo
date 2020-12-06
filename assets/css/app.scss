@@ -1,11 +1,17 @@
-/* This file is for your main application css. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .login-form {
+    @apply border border-green-700 text-green-700 rounded-md bg-transparent py-2 px-4 w-64;
+  }
+}
+
+
+
 @import "../node_modules/nprogress/nprogress.css";
-
-@import "./ileamo.css";
-
+@import "./ileamo.scss";
 /* LiveView specific classes for your customizations */
 .invalid-feedback {
   color: #a94442;
