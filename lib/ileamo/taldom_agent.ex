@@ -1,25 +1,74 @@
 defmodule Ileamo.TaldomAgent do
   use Agent
+  alias CircularBuffer, as: CB
+  @cb_size 10
 
   def start_link(_) do
     Agent.start_link(
       fn ->
-        %{timer: {"1", ""}, temp: {"", ""}, humi: {"", ""}, btemp: {"", ""}, csq: {99, ""}}
+        %{
+          timer: %{val: {"1", ""}},
+          temp: %{val: {"", ""}},
+          humi: %{val: {"", ""}},
+          btemp: %{val: {"", ""}},
+          csq: %{val: {"", ""}}
+        }
+        |> Enum.map(fn {sensor, map} -> {sensor, Map.put(map, :cb, CB.new(@cb_size))} end)
+        |> Enum.into(%{})
       end,
       name: __MODULE__
     )
   end
 
   def get_sensor(:all) do
-    Agent.get(__MODULE__, fn state -> state end)
+    Agent.get(__MODULE__, fn state ->
+      state
+      |> Enum.map(fn {sensor, %{val: val}} -> {sensor, val} end)
+      |> Enum.into(%{})
+    end)
   end
 
   def get_sensor(sensor) do
-    Agent.get(__MODULE__, fn state -> state[sensor] end)
+    Agent.get(__MODULE__, fn state -> state[sensor][:val] end)
+  end
+
+  def get_sensor_trend(sensor, eq) do
+    Agent.get(__MODULE__, fn state ->
+      %{val: {val, _ts}, cb: cb} = state[sensor]
+
+      with {val, _} <- Float.parse(val),
+           cb = [_ | _] <-
+             CB.to_list(cb)
+             |> Enum.map(fn str ->
+               case Float.parse(str) do
+                 {v, _} -> v
+                 _ -> :error
+               end
+             end)
+             |> Enum.filter(fn
+               f when is_float(f) -> true
+               _ -> false
+             end) do
+               avg = Enum.sum(cb) / length(cb)
+               diff = val - avg
+               cond do
+                 diff > eq -> :up
+                 diff < -eq -> :down
+                 true -> :eq
+               end
+      else
+        _ -> :no_data
+      end
+    end)
   end
 
   def update_sensor(sensor, val) do
     Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {sensor, val})
-    Agent.update(__MODULE__, fn state -> state |> Map.put(sensor, val) end)
+
+    Agent.update(__MODULE__, fn
+      state = %{^sensor => %{val: {prev_val, _ts}, cb: cb}} ->
+        state
+        |> Map.put(sensor, %{val: val, cb: CB.insert(cb, prev_val)})
+    end)
   end
 end

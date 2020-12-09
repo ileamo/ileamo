@@ -11,10 +11,11 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     container: {},
-    extend: {
-      colors: {
-        cyan: colors.cyan,
-      }
+    colors: {
+      transparent: 'transparent',
+      current: 'currentColor',
+      green: colors.emerald,
+      yellow: colors.amber,
     }
   },
   variants: {

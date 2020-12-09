@@ -1,6 +1,8 @@
 defmodule IleamoWeb.TaldomLive do
   use IleamoWeb, :live_view
   require Logger
+  alias Ileamo.TaldomAgent, as: TA
+
   @no_connection "Нет связи с домом!"
   @plots [
     {"TEMP[taldom]", "Температура в доме"},
@@ -30,7 +32,7 @@ defmodule IleamoWeb.TaldomLive do
           csq: {csq, csq_date},
           humi: {humi, humi_date},
           temp: {temp, temp_date}
-        } = Ileamo.TaldomAgent.get_sensor(:all)
+        } = TA.get_sensor(:all)
 
         if connected?(socket) do
           Process.send_after(self(), :timer, 1000)
@@ -51,6 +53,9 @@ defmodule IleamoWeb.TaldomLive do
            humi_date: humi_date,
            btemp_date: btemp_date,
            csq_date: csq_date,
+           temp_trend: :eq,
+           humi_trend: :eq,
+           btemp_trend: :eq,
            local_time: get_local_time(),
            plot: @waiting,
            plot_key: plot_key,
@@ -90,15 +95,18 @@ defmodule IleamoWeb.TaldomLive do
   end
 
   def handle_info({:temp, {val, ts}}, socket) do
-    {:noreply, assign(socket, temp: val, temp_date: ts, error: "")}
+    trend = TA.get_sensor_trend(:temp, 0.1)
+    {:noreply, assign(socket, temp: val, temp_date: ts, temp_trend: trend, error: "")}
   end
 
   def handle_info({:humi, {val, ts}}, socket) do
-    {:noreply, assign(socket, humi: val, humi_date: ts, error: "")}
+    trend = TA.get_sensor_trend(:humi, 1)
+    {:noreply, assign(socket, humi: val, humi_date: ts, humi_trend: trend, error: "")}
   end
 
   def handle_info({:btemp, {val, ts}}, socket) do
-    {:noreply, assign(socket, btemp: val, btemp_date: ts, error: "")}
+    trend = TA.get_sensor_trend(:btemp, 0.1)
+    {:noreply, assign(socket, btemp: val, btemp_date: ts, btemp_trend: trend, error: "")}
   end
 
   def handle_info({:csq, {val, ts}}, socket) do
@@ -166,5 +174,13 @@ defmodule IleamoWeb.TaldomLive do
       )
 
     plot
+  end
+
+  def get_trend_svg(trend) do
+    if trend in [:up, :down] do
+      render(IleamoWeb.PageView, "arrow-#{trend}.html",
+        class: "ml-2 w-8 h-8 fill-current text-green-800"
+      )
+    end
   end
 end

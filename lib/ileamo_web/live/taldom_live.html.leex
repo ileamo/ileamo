@@ -1,10 +1,19 @@
 <div class="house">
-  <div class="taldom-sensors">
-    <h2 class="text-3xl text-green-800 font-bold mt-8">Температура: <%= @temp %>&#8451;</h2>
+  <div>
+    <div class="flex flex-row items-center mt-8">
+      <h2 class="text-3xl text-green-800 font-bold">Температура: <%= @temp %>&#8451;</h2>
+      <%= get_trend_svg(@temp_trend) %>
+    </div>
     <p class="text-sm text-gray-700"><%= @temp_date %></p>
-    <h2 class="text-3xl text-green-800 font-bold mt-3">Влажность: <%= @humi %>%</h2>
+    <div class="flex flex-row items-center mt-8">
+      <h2 class="text-3xl text-green-800 font-bold mt-3">Влажность: <%= @humi %>%</h2>
+      <%= get_trend_svg(@humi_trend) %>
+    </div>
     <p class="text-sm text-gray-700"><%= @humi_date %></p>
-    <h2 class="text-3xl text-green-800 font-bold mt-3">Подпол: <%= @btemp %>&#8451;</h2>
+    <div class="flex flex-row items-center mt-8">
+      <h2 class="text-3xl text-green-800 font-bold mt-3">Подпол: <%= @btemp %>&#8451;</h2>
+      <%= get_trend_svg(@btemp_trend) %>
+    </div>
     <p class="text-sm text-gray-700"><%= @btemp_date %></p>
     <h3 class="text-xl text-green-800 mt-3"> Уровень сигнала: <%= @csq %></h3>
     <p class="text-sm text-gray-700"><%= @csq_date %></p>
@@ -13,14 +22,13 @@
   <h2 class="text-xl text-green-800 mt-3 text-center">
     <%= @plot_header %>
   </h2>
-  <div class="relative" phx-click="plot-content" phx-value-key="<%= @plot_key %>">
+  <div class="relative cursor-pointer" phx-click="plot-content" phx-value-key="<%= @plot_key %>">
     <%= @plot %>
     <%= if @bounce do %>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-           stroke="currentColor"
+      <svg fill="none" viewBox="0 0 24 24"
            class="absolute bottom-1/2 right-1/2 transform translate-x-1/2 w-8 h-8
-                  animate-bounce text-yellow-700" >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                  animate-bounce stroke-current text-yellow-700 stroke-2" >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
       </svg>
     <% end %>
   </div>
