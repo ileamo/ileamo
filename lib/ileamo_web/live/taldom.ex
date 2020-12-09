@@ -53,9 +53,9 @@ defmodule IleamoWeb.TaldomLive do
            humi_date: humi_date,
            btemp_date: btemp_date,
            csq_date: csq_date,
-           temp_trend: :eq,
-           humi_trend: :eq,
-           btemp_trend: :eq,
+           temp_trend: TA.get_sensor_trend(:temp, 0.09),
+           humi_trend: TA.get_sensor_trend(:humi, 0.9),
+           btemp_trend: TA.get_sensor_trend(:btemp, 0.09),
            local_time: get_local_time(),
            plot: @waiting,
            plot_key: plot_key,
@@ -95,17 +95,17 @@ defmodule IleamoWeb.TaldomLive do
   end
 
   def handle_info({:temp, {val, ts}}, socket) do
-    trend = TA.get_sensor_trend(:temp, 0.1)
+    trend = TA.get_sensor_trend(:temp, 0.09)
     {:noreply, assign(socket, temp: val, temp_date: ts, temp_trend: trend, error: "")}
   end
 
   def handle_info({:humi, {val, ts}}, socket) do
-    trend = TA.get_sensor_trend(:humi, 1)
+    trend = TA.get_sensor_trend(:humi, 0.9)
     {:noreply, assign(socket, humi: val, humi_date: ts, humi_trend: trend, error: "")}
   end
 
   def handle_info({:btemp, {val, ts}}, socket) do
-    trend = TA.get_sensor_trend(:btemp, 0.1)
+    trend = TA.get_sensor_trend(:btemp, 0.09)
     {:noreply, assign(socket, btemp: val, btemp_date: ts, btemp_trend: trend, error: "")}
   end
 

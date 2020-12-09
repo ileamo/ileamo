@@ -49,26 +49,33 @@ defmodule Ileamo.TaldomAgent do
                f when is_float(f) -> true
                _ -> false
              end) do
-               avg = Enum.sum(cb) / length(cb)
-               diff = val - avg
-               cond do
-                 diff > eq -> :up
-                 diff < -eq -> :down
-                 true -> :eq
-               end
+        avg = Enum.sum(cb) / length(cb)
+        diff = val - avg
+
+        cond do
+          diff > eq -> :up
+          diff < -eq -> :down
+          true -> :eq
+        end
       else
         _ -> :no_data
       end
     end)
   end
 
-  def update_sensor(sensor, val) do
+  def update_sensor(sensor, val = {curr_val, _ts}) do
     Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {sensor, val})
 
     Agent.update(__MODULE__, fn
       state = %{^sensor => %{val: {prev_val, _ts}, cb: cb}} ->
+        new_cb =
+          cond do
+            curr_val == prev_val -> cb
+            true -> CB.insert(cb, prev_val)
+          end
+
         state
-        |> Map.put(sensor, %{val: val, cb: CB.insert(cb, prev_val)})
+        |> Map.put(sensor, %{val: val, cb: new_cb})
     end)
   end
 end
