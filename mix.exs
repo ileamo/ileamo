@@ -47,6 +47,8 @@ defmodule Ileamo.MixProject do
       {:floki, ">= 0.27.0", only: :test},
       {:tortoise, "~> 0.9"},
       {:circular_buffer, "~> 0.3.0"},
+      {:hackney, "~> 1.16", override: true},
+      {:httpoison, "~> 1.7"},
       {:contex, git: "https://github.com/mindok/contex"},
       {:zabbix, git: "https://github.com/ileamo/zabbix.git"}
     ]

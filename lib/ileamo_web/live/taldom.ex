@@ -60,7 +60,8 @@ defmodule IleamoWeb.TaldomLive do
            plot: @waiting,
            plot_key: plot_key,
            plot_header: plot_header,
-           bounce: false
+           bounce: false,
+           owm_temp: Ileamo.OwmAgent.get_temp("taldom,ru")
          )}
 
       _ ->

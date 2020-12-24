@@ -1,21 +1,28 @@
 <div class="house">
   <div>
-    <div class="flex flex-row items-center mt-8">
+    <%= if @owm_temp do %>
+      <div>
+        <h2 class="text-sm text-green-900 text-right">
+          Температура  в городе: <%= @owm_temp %>&#8451;
+        </h2>
+      </div>
+    <% end %>
+    <div class="flex flex-row items-center mt-3">
       <h2 class="text-3xl text-green-800 font-bold">Температура: <%= @temp %>&#8451;</h2>
       <%= get_trend_svg(@temp_trend) %>
     </div>
     <p class="text-sm text-gray-700"><%= @temp_date %></p>
-    <div class="flex flex-row items-center mt-8">
+    <div class="flex flex-row items-center mt-3">
       <h2 class="text-3xl text-green-800 font-bold mt-3">Влажность: <%= @humi %>%</h2>
       <%= get_trend_svg(@humi_trend) %>
     </div>
     <p class="text-sm text-gray-700"><%= @humi_date %></p>
-    <div class="flex flex-row items-center mt-8">
+    <div class="flex flex-row items-center mt-3">
       <h2 class="text-3xl text-green-800 font-bold mt-3">Подпол: <%= @btemp %>&#8451;</h2>
       <%= get_trend_svg(@btemp_trend) %>
     </div>
     <p class="text-sm text-gray-700"><%= @btemp_date %></p>
-    <h3 class="text-xl text-green-800 mt-3"> Уровень сигнала: <%= @csq %></h3>
+    <h3 class="text-xl text-green-800 mt-6"> Уровень сигнала: <%= @csq %></h3>
     <p class="text-sm text-gray-700"><%= @csq_date %></p>
   </div>
   <div><h2 class="text-3xl text-red-800 font-bold mt-8"><%= @error %></h2></div>
