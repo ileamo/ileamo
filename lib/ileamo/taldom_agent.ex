@@ -1,7 +1,5 @@
 defmodule Ileamo.TaldomAgent do
   use Agent
-  alias CircularBuffer, as: CB
-  @cb_size 10
 
   def start_link(_) do
     Agent.start_link(
@@ -13,7 +11,7 @@ defmodule Ileamo.TaldomAgent do
           btemp: %{val: {"", ""}},
           csq: %{val: {"", ""}}
         }
-        |> Enum.map(fn {sensor, map} -> {sensor, Map.put(map, :cb, CB.new(@cb_size))} end)
+        |> Enum.map(fn {sensor, map} -> {sensor, Map.put(map, :cb, [])} end)
         |> Enum.into(%{})
       end,
       name: __MODULE__
@@ -37,7 +35,7 @@ defmodule Ileamo.TaldomAgent do
       with %{val: {val, _ts}, cb: cb} <- state[sensor],
            {val, _} <- Float.parse(val),
            cb = [_ | _] <-
-             CB.to_list(cb)
+             cb
              |> Enum.map(fn str ->
                case Float.parse(str) do
                  {v, _} -> v
@@ -64,8 +62,8 @@ defmodule Ileamo.TaldomAgent do
 
   def get_sensor_history(sensor) do
     Agent.get(__MODULE__, fn state ->
-      with %{val: {val, _ts}, cb: cb} <- state[sensor] do
-        CB.to_list(cb) ++ [val]
+      with %{cb: cb} when is_list(cb) <- state[sensor] do
+        Enum.reverse(cb)
       else
         _ -> []
       end
@@ -76,11 +74,12 @@ defmodule Ileamo.TaldomAgent do
     Phoenix.PubSub.broadcast(Ileamo.PubSub, "mqtt", {sensor, val})
 
     Agent.update(__MODULE__, fn
-      state = %{^sensor => %{val: {prev_val, _ts}, cb: cb}} ->
+      state = %{^sensor => %{cb: cb}} ->
         new_cb =
-          cond do
-            curr_val == prev_val -> cb
-            true -> CB.insert(cb, prev_val)
+          case {curr_val, cb} do
+            {v, [v | _]} -> cb
+            {v, [p, v, p | rest]} -> [v, p | rest]
+            _ -> [curr_val | cb] |> Enum.take(8)
           end
 
         state

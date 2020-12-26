@@ -8,7 +8,7 @@
       </div>
     <% end %>
     <div class="flex flex-row items-center mt-3" phx-click="temp-history">
-      <h2 class="text-3xl text-green-800 font-bold">Температура: <%= @temp %>&#8451;</h2>
+      <h2 class="text-2xl text-green-800 font-bold">Температура: <%= @temp %>&#8451;</h2>
       <%= get_trend_svg(@temp_trend) %>
     </div>
     <p class="text-sm text-gray-700"><%= @temp_date %></p>
@@ -17,7 +17,7 @@
     <% end %>
 
     <div class="flex flex-row items-center mt-3" phx-click="humi-history">
-      <h2 class="text-3xl text-green-800 font-bold mt-3">Влажность: <%= @humi %>%</h2>
+      <h2 class="text-2xl text-green-800 font-bold mt-3">Влажность: <%= @humi %>%</h2>
       <%= get_trend_svg(@humi_trend) %>
     </div>
     <p class="text-sm text-gray-700"><%= @humi_date %></p>
@@ -26,7 +26,7 @@
     <% end %>
 
     <div class="flex flex-row items-center mt-3" phx-click="btemp-history">
-      <h2 class="text-3xl text-green-800 font-bold mt-3">Подпол: <%= @btemp %>&#8451;</h2>
+      <h2 class="text-2xl text-green-800 font-bold mt-3">Подпол: <%= @btemp %>&#8451;</h2>
       <%= get_trend_svg(@btemp_trend) %>
     </div>
     <p class="text-sm text-gray-700"><%= @btemp_date %></p>
