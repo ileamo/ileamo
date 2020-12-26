@@ -34,9 +34,8 @@ defmodule Ileamo.TaldomAgent do
 
   def get_sensor_trend(sensor, eq) do
     Agent.get(__MODULE__, fn state ->
-      %{val: {val, _ts}, cb: cb} = state[sensor]
-
-      with {val, _} <- Float.parse(val),
+      with %{val: {val, _ts}, cb: cb} <- state[sensor],
+           {val, _} <- Float.parse(val),
            cb = [_ | _] <-
              CB.to_list(cb)
              |> Enum.map(fn str ->
@@ -59,6 +58,16 @@ defmodule Ileamo.TaldomAgent do
         end
       else
         _ -> :no_data
+      end
+    end)
+  end
+
+  def get_sensor_history(sensor) do
+    Agent.get(__MODULE__, fn state ->
+      with %{val: {val, _ts}, cb: cb} <- state[sensor] do
+        CB.to_list(cb) ++ [val]
+      else
+        _ -> []
       end
     end)
   end

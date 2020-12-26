@@ -56,6 +56,13 @@ defmodule IleamoWeb.TaldomLive do
            temp_trend: TA.get_sensor_trend(:temp, 0.09),
            humi_trend: TA.get_sensor_trend(:humi, 0.9),
            btemp_trend: TA.get_sensor_trend(:btemp, 0.09),
+           temp_history: TA.get_sensor_history(:temp),
+           humi_history: TA.get_sensor_history(:humi),
+           btemp_history: TA.get_sensor_history(:btemp),
+           temp_history_show: false,
+           humi_history_show: false,
+           btemp_history_show: false,
+           csq_history: TA.get_sensor_history(:csq),
            local_time: get_local_time(),
            plot: @waiting,
            plot_key: plot_key,
@@ -97,17 +104,32 @@ defmodule IleamoWeb.TaldomLive do
 
   def handle_info({:temp, {val, ts}}, socket) do
     trend = TA.get_sensor_trend(:temp, 0.09)
-    {:noreply, assign(socket, temp: val, temp_date: ts, temp_trend: trend, error: "")}
+    history = TA.get_sensor_history(:temp)
+
+    {:noreply,
+     assign(socket, temp: val, temp_date: ts, temp_trend: trend, temp_history: history, error: "")}
   end
 
   def handle_info({:humi, {val, ts}}, socket) do
     trend = TA.get_sensor_trend(:humi, 0.9)
-    {:noreply, assign(socket, humi: val, humi_date: ts, humi_trend: trend, error: "")}
+    history = TA.get_sensor_history(:humi)
+
+    {:noreply,
+     assign(socket, humi: val, humi_date: ts, humi_trend: trend, humi_history: history, error: "")}
   end
 
   def handle_info({:btemp, {val, ts}}, socket) do
     trend = TA.get_sensor_trend(:btemp, 0.09)
-    {:noreply, assign(socket, btemp: val, btemp_date: ts, btemp_trend: trend, error: "")}
+    history = TA.get_sensor_history(:btemp)
+
+    {:noreply,
+     assign(socket,
+       btemp: val,
+       btemp_date: ts,
+       btemp_trend: trend,
+       btemp_history: history,
+       error: ""
+     )}
   end
 
   def handle_info({:csq, {val, ts}}, socket) do
@@ -133,8 +155,20 @@ defmodule IleamoWeb.TaldomLive do
     {:noreply, assign(socket, plot_key: plot_key, plot_header: plot_header, plot: @waiting)}
   end
 
-  def handle_event(event, _, socket) do
-    Logger.error("Unrecognized event: #{inspect(event)}")
+  def handle_event("temp-history", _, socket = %{assigns: %{temp_history_show: on}}) do
+    {:noreply, assign(socket, temp_history_show: !on)}
+  end
+
+  def handle_event("btemp-history", _, socket = %{assigns: %{btemp_history_show: on}}) do
+    {:noreply, assign(socket, btemp_history_show: !on)}
+  end
+
+  def handle_event("humi-history", _, socket = %{assigns: %{humi_history_show: on}}) do
+    {:noreply, assign(socket, humi_history_show: !on)}
+  end
+
+  def handle_event(event, params, socket) do
+    Logger.error("Unrecognized event: #{inspect(event)}(#{inspect(params)})")
     {:noreply, socket}
   end
 
