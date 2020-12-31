@@ -16,8 +16,8 @@
       <p class="text-sm text-gray-700"><%= @temp_history |> Enum.join(" ") %></p>
     <% end %>
 
-    <div class="flex flex-row items-center mt-3" phx-click="humi-history">
-      <h2 class="text-2xl text-green-800 font-bold mt-3">Влажность: <%= @humi %>%</h2>
+    <div class="flex flex-row items-center mt-6" phx-click="humi-history">
+      <h2 class="text-2xl text-green-800 font-bold">Влажность: <%= @humi %>%</h2>
       <%= get_trend_svg(@humi_trend) %>
     </div>
     <p class="text-sm text-gray-700"><%= @humi_date %></p>
@@ -25,8 +25,8 @@
       <p class="text-sm text-gray-700"><%= @humi_history |> Enum.join(" ") %></p>
     <% end %>
 
-    <div class="flex flex-row items-center mt-3" phx-click="btemp-history">
-      <h2 class="text-2xl text-green-800 font-bold mt-3">Подпол: <%= @btemp %>&#8451;</h2>
+    <div class="flex flex-row items-center mt-6" phx-click="btemp-history">
+      <h2 class="text-2xl text-green-800 font-bold">Подпол: <%= @btemp %>&#8451;</h2>
       <%= get_trend_svg(@btemp_trend) %>
     </div>
     <p class="text-sm text-gray-700"><%= @btemp_date %></p>
