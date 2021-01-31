@@ -76,7 +76,8 @@ defmodule Ileamo.PlotAgent do
 
         [{start, val} | tail] ->
           {stop, _last_value} = List.last(tail)
-          delta = (stop - start) / 60
+          #delta = (stop - start) / (7 * 24 * 4)
+          delta = 60 * 15
 
           tail
           |> Enum.chunk_while(
