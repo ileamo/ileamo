@@ -11,7 +11,7 @@ defmodule Ileamo.PlotAgent do
     )
   end
 
-  @delta 60 * 60
+  @delta 60 * 15
   def request_plot(key, pid) do
     Agent.cast(__MODULE__, fn state ->
       with {svg, ts} <- state[key],
